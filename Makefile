@@ -8,7 +8,7 @@ build:
 	./main
 
 clean:
-	rm -rf test.c test
+	rm -rf test.c test main
 
 test: clean make_tests
 	${GCCG} ${FLAGS} test.c -lcheck -lm -o test
