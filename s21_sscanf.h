@@ -1,3 +1,5 @@
+#include <stdarg.h>
+
 typedef struct s_token {
   int no_assign;
   int widht;
