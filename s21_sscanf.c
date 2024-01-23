@@ -3,12 +3,12 @@
 int s21_sscanf(const char* str, const char *format, ...){
     int error = 0;
     va_list ap;
-    s_tok token[10]; //задать не статически
+    s_tok *token = NULL; //задать не статически
     va_start(ap, format);
     // сначала - убрать пробелы, табы и тд
-    format = delete_whitespaces(format);
+    format = delete_whitespaces(format); // возможно это не нужно !!!!!!!!!!!!
     // далее - отформатировать строку format на токены
-    // error = find_tokens(format, token);
+    error = find_tokens(format, token);
     if(error){
         printf("ERROR");
         va_end(ap);
@@ -46,9 +46,46 @@ char* delete_whitespaces(const char *format) {
     return new_format;
 }
 
-// int find_tokens(char *format, s_tok *token) {
-//     return 0;
-// }
+int find_tokens(char *format, s_tok *token) {
+    char *ptr = strtok(format, "%");
+    int error = (!ptr) ? 1 : 0, i = 0;
+    while(!error && ptr){
+        token = realloc(token, sizeof(s_tok)*(i + 1));
+        if(ptr == '*'){
+            token[i].no_assign = 1;
+            ptr++;
+        } else
+            token[i].no_assign = 0;
+        //if(ptr == ) тут разобрать width
+        if(is_length(ptr)){
+            token[i].length = ptr;
+            ptr++;
+        } else
+            token[i].length = ' ';
+        if(is_specif(ptr))
+            token[i].spec = ptr;
+        else
+            error = 1;
+        ptr = strtok(format, "%");
+        i++;
+    }
+    return error;
+}
+
+int is_length(char ch){
+    return ch == 'h' || ch == 'l' || ch == 'L';
+}
+
+int is_specif(char ch){
+    return  ch == 'c' || ch == 'd' ||
+            ch == 'i' || ch == 'e' ||
+            ch == 'E' || ch == 'f' ||
+            ch == 'g' || ch == 'G' ||
+            ch == 'o' || ch == 's' ||
+            ch == 'u' || ch == 'x' ||
+            ch == 'X' || ch == 'p' ||
+            ch == 'n';
+}
 
 // int there_no_errors(s_tok token, arg) {
     

@@ -1,7 +1,9 @@
 #include <stdarg.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
 
+// %[*][ширина][длина]спецификатор
 typedef struct s_token {
   int no_assign;
   int widht;
@@ -15,3 +17,5 @@ int find_tokens(char *format, s_tok *token);
 // int there_no_errors(s_tok token, arg); //????
 // void find_coincid_str(char *str, s_tok token, arg);
 int s21_isspace(int ch);
+int is_specif(char ch);
+int is_length(char ch);
