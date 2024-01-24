@@ -1,32 +1,39 @@
 #include "s21_sscanf.h"
 
 int s21_sscanf(const char* str, const char *format, ...){
-    int error = 0;
+    //int error = 0;
     va_list ap;
-    s_tok *token = NULL; //задать не статически
+    s_tok token;
     va_start(ap, format);
+    const char *ptr = format;
+    const char *str_ptr = str;
     // сначала - убрать пробелы, табы и тд
-    format = delete_whitespaces(format); // возможно это не нужно !!!!!!!!!!!!
+    // format = delete_whitespaces(format); // возможно это не нужно !!!!!!!!!!!!
     // далее - отформатировать строку format на токены
-    error = find_tokens(format, token);
-    if(error){
-        printf("ERROR");
-        va_end(ap);
-        free((void*)format);
-        return 1;
-    }
-    // потом по порядку искать i-ый токен с начала строки str
-    for(int i = 0; ; i++){ //тут длинна листа аргументов
-        // и связывать его с i-ым адресом (сначала - проверить тип у адреса)
-        error = (token[i].spec == sizeof(va_arg(ap, char))) ? 1 : 0; // <========= !!!!!!!!
-        if(error){
-            printf("ERROR");
-            va_end(ap);
-            free((void*)format);
-            return 1;
-        }
+    // error = find_tokens(format, token);
+    // if(error){
+    //     printf("ERROR");
+    //     va_end(ap);
+    //     free((void*)format);
+    //     return 1;
+    // }
+    // сравнивать str и format
+    for(char ch = *ptr; ch != '\0'; ){
+        if(ch == '%')
+            token = find_token(&ptr);
+        printf("HELL");
+        if(token.spec)
+            catch_arg(&str_ptr, token, va_arg(ap, void*));
+        ch = *(++ptr);
+        // error = (token[i].spec == sizeof(va_arg(ap, char))) ? 1 : 0; // <========= !!!!!!!!
+        // if(error){
+        //     printf("ERROR");
+        //     va_end(ap);
+        //     free((void*)format);
+        //     return 1;
+        // }
         // else
-            // find_coincid_str(str, token[i], arg); //последнее - это адре
+            // find_coincid_str(str, token[i], arg);
     }
     va_end(ap);
     free((void*)format);
@@ -46,32 +53,36 @@ char* delete_whitespaces(const char *format) {
     return new_format;
 }
 
-int find_tokens(char *format, s_tok *token) {
-    char *ptr = strtok(format, "%");
-    int error = (!ptr) ? 1 : 0, i = 0, tmp;
-    while(!error && ptr){
-        token = realloc(token, sizeof(s_tok)*(i + 1));
-        token[i].no_assign = 0;
-        token[i].widht = 0;
-        token[i].length = 0;
-        if(ptr == '*'){
-            token[i].no_assign = 1;
-            ptr++;
+int catch_arg(const char **str_ptr, s_tok token, void* arg){
+    if(token.spec == 'd'){
+        *((int*)arg) = 0;
+        while(**str_ptr >= '0' && **str_ptr <= '9'){
+            *((int*)arg) = ( *((int*)arg)) ? *((int*)arg)*10+**str_ptr : **str_ptr;
+            (*str_ptr)++;
         }
-        while(ptr >= '0' || ptr <= '9')
-            token[i].widht = (token[i].widht) ? ptr : token[i].widht*10 + ptr;
-        if(is_length(ptr)){
-            token[i].length = ptr;
-            ptr++;
-        }
-        if(is_specif(ptr))
-            token[i].spec = ptr;
-        else
-            error = 1;
-        ptr = strtok(format, "%");
-        i++;
     }
-    return error;
+    return 0;
+}
+
+s_tok find_token(const char **format) {
+    s_tok token;
+    token.no_assign = 0;
+    token.widht = 0;
+    token.length = 0;
+    token.spec = 0;
+    if(**format == '*'){
+        token.no_assign = 1;
+        (*format)++;
+    }
+    if(is_length(**format)){
+        token.length = **format;
+        (*format)++;
+    }
+    if(is_specif(**format)){
+        token.spec = **format;
+        (*format)++;
+    }
+    return token;
 }
 
 int is_length(char ch){
@@ -105,9 +116,7 @@ int s21_isspace(int ch){
 }
 
 int main(){
-    const char *f = "Hello  Word and something else      ... fwsdf    §§fwf wefw";
-    printf("before = %s\n", f);
-    f = delete_whitespaces(f);
-    printf("after = %s", f);
-    free((void*)f);
+    int t = 0;
+    s21_sscanf("123", "%d", &t);
+    printf("%d", t);
 }
