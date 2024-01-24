@@ -48,20 +48,22 @@ char* delete_whitespaces(const char *format) {
 
 int find_tokens(char *format, s_tok *token) {
     char *ptr = strtok(format, "%");
-    int error = (!ptr) ? 1 : 0, i = 0;
+    int error = (!ptr) ? 1 : 0, i = 0, tmp;
     while(!error && ptr){
         token = realloc(token, sizeof(s_tok)*(i + 1));
+        token[i].no_assign = 0;
+        token[i].widht = 0;
+        token[i].length = 0;
         if(ptr == '*'){
             token[i].no_assign = 1;
             ptr++;
-        } else
-            token[i].no_assign = 0;
-        //if(ptr == ) тут разобрать width
+        }
+        while(ptr >= '0' || ptr <= '9')
+            token[i].widht = (token[i].widht) ? ptr : token[i].widht*10 + ptr;
         if(is_length(ptr)){
             token[i].length = ptr;
             ptr++;
-        } else
-            token[i].length = ' ';
+        }
         if(is_specif(ptr))
             token[i].spec = ptr;
         else
