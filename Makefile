@@ -1,5 +1,5 @@
 GCCG = gcc
-FLAGS= -Wall -Werror -Wextra -std=c11 -g # <== flag
+ #FLAGS= -Wall -Werror -Wextra -std=c11 -g # <== flag
 
 all: clean build
 

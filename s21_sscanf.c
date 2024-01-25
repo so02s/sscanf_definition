@@ -5,26 +5,18 @@ int s21_sscanf(const char* str, const char *format, ...){
     va_list ap;
     s_tok token;
     va_start(ap, format);
-    const char *ptr = format;
-    const char *str_ptr = str;
-    // сначала - убрать пробелы, табы и тд
-    // format = delete_whitespaces(format); // возможно это не нужно !!!!!!!!!!!!
-    // далее - отформатировать строку format на токены
-    // error = find_tokens(format, token);
-    // if(error){
-    //     printf("ERROR");
-    //     va_end(ap);
-    //     free((void*)format);
-    //     return 1;
-    // }
+    char *form_ptr = (char*)format, *str_ptr = (char*)str;
     // сравнивать str и format
-    for(char ch = *ptr; ch != '\0'; ){
-        if(ch == '%')
-            token = find_token(&ptr);
-        printf("HELL");
+    // format не смотрит на пробелы 
+    for(; *form_ptr != '\0'; form_ptr++){
+        if(*form_ptr == '%'){
+            form_ptr++;
+            token = find_token(&form_ptr);
+            // printf("token = %d %d %c %c",token.no_assign, token.widht,
+            //     token.length, token.spec);
+            }
         if(token.spec)
             catch_arg(&str_ptr, token, va_arg(ap, void*));
-        ch = *(++ptr);
         // error = (token[i].spec == sizeof(va_arg(ap, char))) ? 1 : 0; // <========= !!!!!!!!
         // if(error){
         //     printf("ERROR");
@@ -36,7 +28,6 @@ int s21_sscanf(const char* str, const char *format, ...){
             // find_coincid_str(str, token[i], arg);
     }
     va_end(ap);
-    free((void*)format);
     return 0;
 }
 
@@ -53,24 +44,28 @@ char* delete_whitespaces(const char *format) {
     return new_format;
 }
 
-int catch_arg(const char **str_ptr, s_tok token, void* arg){
+int catch_arg(char **str_ptr, s_tok token, void* arg){
     if(token.spec == 'd'){
-        *((int*)arg) = 0;
-        while(**str_ptr >= '0' && **str_ptr <= '9'){
-            *((int*)arg) = ( *((int*)arg)) ? *((int*)arg)*10+**str_ptr : **str_ptr;
+        int *p = (int*)arg;
+        *p = 0;
+        char ch = **str_ptr;
+        while(ch >= '0' && ch <= '9'){
+            *p = (*p) ? *p * 10 + (ch - 48) : (ch - 48);
             (*str_ptr)++;
+            ch = **str_ptr;
         }
     }
     return 0;
 }
 
-s_tok find_token(const char **format) {
+s_tok find_token(char **format) {
     s_tok token;
+    char ch = **format;
     token.no_assign = 0;
     token.widht = 0;
     token.length = 0;
     token.spec = 0;
-    if(**format == '*'){
+    if(ch == '*'){
         token.no_assign = 1;
         (*format)++;
     }
@@ -78,10 +73,8 @@ s_tok find_token(const char **format) {
         token.length = **format;
         (*format)++;
     }
-    if(is_specif(**format)){
+    if(is_specif(**format))
         token.spec = **format;
-        (*format)++;
-    }
     return token;
 }
 
@@ -115,8 +108,24 @@ int s21_isspace(int ch){
         return 0;
 }
 
-int main(){
-    int t = 0;
-    s21_sscanf("123", "%d", &t);
+void some_test(size_t num, ...){
+    va_list ap;
+    void* ptr = NULL;
+    va_start(ap,num);
+    for (size_t i = 0; i < num; i++){
+        ptr = va_arg(ap,void*);
+        *((int*)ptr) += 10;
+        printf("%d\n",*((int*)ptr));
+    }
+}
+
+void scanf_test(){
+    int t = 33, k = 84;
+    s21_sscanf("12324rew3", "%d", &t);
     printf("%d", t);
 }
+
+int main(){
+    scanf_test();
+}
+
